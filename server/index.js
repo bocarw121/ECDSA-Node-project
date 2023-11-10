@@ -6,11 +6,34 @@ const port = 3042;
 app.use(cors());
 app.use(express.json());
 
-const balances = {
-  '0x1': 100,
-  '0x2': 50,
-  '0x3': 75,
-};
+const balances = [];
+const INITIAL_BALANCE = 100;
+
+const ethAddressRegex = /^0x[0-9a-fA-F]{40}$/;
+
+app.get('/create/:address', (req, res) => {
+  const { address } = req.params;
+
+  // verify that the address is a valid format
+  const isValidAddress = ethAddressRegex.test(address);
+
+  if (isValidAddress) {
+    const balancePayload = {
+      [address]: INITIAL_BALANCE,
+    };
+
+    balances.push(balancePayload);
+
+    res.json({ accountCreated: true });
+    return;
+  }
+
+  // still send a 200 message to be able to display error message in frontend
+  res.json({
+    accountCreated: false,
+    error: 'Unable to sign you in at the moment. Please try again later.',
+  });
+});
 
 app.get('/balance/:address', (req, res) => {
   const { address } = req.params;
