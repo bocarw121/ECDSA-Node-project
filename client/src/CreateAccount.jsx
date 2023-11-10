@@ -15,10 +15,13 @@ function CreateAccount({ setIsAccountCreated, setAddress }) {
     const keccakHash = keccak256(publicKeyWithoutFirstByte);
     // remove first 20 elements from hash
     const addressHash = keccakHash.slice(-20);
+
+    // Convert addressHash bytes to padded hexadecimal string
     const ethAddressStr = Array.from(addressHash)
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('');
-    const address = '0x' + ethAddressStr;
+
+    const address = `0x${ethAddressStr}`;
 
     const {
       data: { accountCreated, error },
@@ -33,6 +36,7 @@ function CreateAccount({ setIsAccountCreated, setAddress }) {
       alert(error);
     }
   }
+
   return (
     <div className="create-account">
       <h1 className="center">Welcome to the best wallet in the market!</h1>
