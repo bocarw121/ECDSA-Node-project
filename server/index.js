@@ -49,8 +49,6 @@ app.get('/create/:address', (req, res) => {
     owner.address = address;
     owner.balance = INITIAL_BALANCE;
 
-    console.log({ owner });
-
     res.json({ accountCreated: true, balance: INITIAL_BALANCE });
     return;
   }
@@ -76,7 +74,7 @@ app.get('/balance/:address', (req, res) => {
     return;
   }
 
-  res.send({ balance });
+  res.json({ balance });
 });
 
 app.post('/send', (req, res) => {

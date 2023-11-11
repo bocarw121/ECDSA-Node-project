@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import server from './server';
 
 function Wallet({ owner }) {
-  console.log(owner);
   return (
     <div className="container wallet">
       <h1>Your Wallet</h1>
