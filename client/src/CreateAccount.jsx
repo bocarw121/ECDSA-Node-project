@@ -40,7 +40,10 @@ function CreateAccount({ setIsAccountCreated, setAddress, setBalance }) {
 
   return (
     <div className="create-account">
-      <h1 className="center">Welcome to the best wallet in the market!</h1>
+      <h1 className="center">Welcome to your personal crypto wallet!</h1>
+      <h3 className="center">
+        Click the create account button to generate a wallet id.
+      </h3>
       <button className="create-account-button" onClick={handleClick}>
         Create an account
       </button>
