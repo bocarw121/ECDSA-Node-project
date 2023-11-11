@@ -86,7 +86,7 @@ input {
 }
 
 .create-account {
-  .create-account-button {
+  &-button {
     outline: none;
     border: 1px solid lightblue;
     background-color: hsla(240, 100%, 50%, 1);

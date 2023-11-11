@@ -1,7 +1,7 @@
 import Wallet from './Wallet';
 import Transfer from './Transfer';
 import './App.scss';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CreateAccount from './CreateAccount';
 import server from './server';
 
@@ -16,17 +16,29 @@ function App() {
       JSON.parse(localStorage.getItem('isAccountCreated')) || false;
     return storedAccountStatus;
   });
+  const [owner, setOwner] = useState(null);
 
-  async function handleBalanceChange() {
-    if (address) {
-      const {
-        data: { balance },
-      } = await server.get(`balance/${address}`);
-      setBalance(balance);
-    } else {
-      setBalance(0);
+  useEffect(() => {
+    if (isAccountCreated) {
+      async function getOwnerInfo() {
+        const {
+          data: { ownerData },
+        } = await server.get('owner');
+
+        setOwner(ownerData);
+
+        // if there is no owner so server then server was restarted
+        // so we make the user create a new address
+        if (!ownerData) {
+          localStorage.removeItem('address');
+          localStorage.removeItem('isAccountCreated');
+          setIsAccountCreated(null);
+        }
+      }
+      getOwnerInfo();
+      setBalance(owner?.balance);
     }
-  }
+  }, [isAccountCreated, balance]);
 
   return (
     <>
@@ -34,12 +46,17 @@ function App() {
         <CreateAccount
           setIsAccountCreated={setIsAccountCreated}
           setAddress={setAddress}
+          setBalance={setBalance}
         />
       )}
       {isAccountCreated && address && (
         <div className="app">
-          <Wallet balance={balance} setBalance={setBalance} address={address} />
-          <Transfer setBalance={setBalance} address={address} />
+          <Wallet owner={owner} />
+          <Transfer
+            setBalance={setBalance}
+            address={address}
+            balance={balance}
+          />
         </div>
       )}
     </>

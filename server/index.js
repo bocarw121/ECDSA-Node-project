@@ -6,10 +6,38 @@ const port = 3042;
 app.use(cors());
 app.use(express.json());
 
-const balances = [];
+const owner = {};
+
+const recipients = [
+  {
+    address: '0xed314062faefa15595460dfa7643fc136149468e',
+    balance: 100,
+  },
+  {
+    address: '0x57550dbd3c4d67ea6dca9ebc7fa4bdd76abeb78d',
+    balance: 50,
+  },
+  {
+    address: '0x3924c3d4e041724f32ab2eb0e63b28a198e603a3',
+    balance: 25,
+  },
+];
 const INITIAL_BALANCE = 100;
 
 const ethAddressRegex = /^0x[0-9a-fA-F]{40}$/;
+
+app.get('/recipients', (req, res) => {
+  res.json({ recipientsData: recipients });
+});
+
+app.get('/owner', (req, res) => {
+  if (!Object.keys(owner).length) {
+    res.json({ ownerData: null });
+    return;
+  }
+
+  res.json({ ownerData: owner });
+});
 
 app.get('/create/:address', (req, res) => {
   const { address } = req.params;
@@ -18,13 +46,12 @@ app.get('/create/:address', (req, res) => {
   const isValidAddress = ethAddressRegex.test(address);
 
   if (isValidAddress) {
-    const balancePayload = {
-      [address]: INITIAL_BALANCE,
-    };
+    owner.address = address;
+    owner.balance = INITIAL_BALANCE;
 
-    balances.push(balancePayload);
+    console.log({ owner });
 
-    res.json({ accountCreated: true });
+    res.json({ accountCreated: true, balance: INITIAL_BALANCE });
     return;
   }
 
@@ -37,33 +64,35 @@ app.get('/create/:address', (req, res) => {
 
 app.get('/balance/:address', (req, res) => {
   const { address } = req.params;
-  const balance = balances[address] || 0;
+
+  const balance = recipients.find(
+    (recipient) => recipient.address === address
+  ).balance;
+
+  if (balance === undefined) {
+    res.status(400).json({
+      error: `No balance associated to address ${address}`,
+    });
+    return;
+  }
+
   res.send({ balance });
 });
 
 app.post('/send', (req, res) => {
-  // TODO: get a signature from the client-side application
   // recover the wallet address and that will be the sender
-  const { sender, recipient, amount } = req.body;
+  const { recipient, amount } = req.body;
 
-  setInitialBalance(sender);
-  setInitialBalance(recipient);
-
-  if (balances[sender] < amount) {
-    res.status(400).send({ message: 'Not enough funds!' });
+  if (owner.balance < amount) {
+    res.status(400).json({ message: 'Not enough funds!' });
   } else {
-    balances[sender] -= amount;
-    balances[recipient] += amount;
-    res.send({ balance: balances[sender] });
+    const recipientInfo = recipients.find((rec) => rec.address === recipient);
+    owner.balance -= amount;
+    recipientInfo.balance += amount;
+    res.json({ balance: owner.balance });
   }
 });
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}!`);
 });
-
-function setInitialBalance(address) {
-  if (!balances[address]) {
-    balances[address] = 0;
-  }
-}

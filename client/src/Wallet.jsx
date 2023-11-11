@@ -1,13 +1,15 @@
+import { useEffect, useState } from 'react';
 import server from './server';
 
-function Wallet({ address, balance }) {
+function Wallet({ owner }) {
+  console.log(owner);
   return (
     <div className="container wallet">
       <h1>Your Wallet</h1>
 
-      <h4>Your wallet address is: {address}</h4>
+      <h4>Your wallet address is: {owner?.address}</h4>
 
-      <div className="balance">Balance: {balance}</div>
+      <div className="balance">Balance: {owner?.balance}</div>
     </div>
   );
 }

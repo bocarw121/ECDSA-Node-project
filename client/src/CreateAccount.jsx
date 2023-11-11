@@ -3,7 +3,7 @@ import { keccak256 } from 'ethereum-cryptography/keccak';
 
 import server from './server';
 
-function CreateAccount({ setIsAccountCreated, setAddress }) {
+function CreateAccount({ setIsAccountCreated, setAddress, setBalance }) {
   async function handleClick(e) {
     e.preventDefault();
     // generate a private key and get the publicKey
@@ -24,7 +24,7 @@ function CreateAccount({ setIsAccountCreated, setAddress }) {
     const address = `0x${ethAddressStr}`;
 
     const {
-      data: { accountCreated, error },
+      data: { accountCreated, balance, error },
     } = await server.get(`create/${address}`);
 
     if (accountCreated) {
@@ -32,6 +32,7 @@ function CreateAccount({ setIsAccountCreated, setAddress }) {
       localStorage.setItem('isAccountCreated', accountCreated);
       setAddress(address);
       setIsAccountCreated(accountCreated);
+      setBalance(balance);
     } else {
       alert(error);
     }

@@ -1,9 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import server from './server';
 
-function Transfer({ address, setBalance }) {
+function Transfer({ address, setBalance, balance }) {
   const [sendAmount, setSendAmount] = useState('');
   const [recipient, setRecipient] = useState('');
+  const [recipients, setRecipients] = useState([]);
+
+  useEffect(() => {
+    async function getRecipientsAddress() {
+      const {
+        data: { recipientsData },
+      } = await server.get(`recipients`);
+
+      setRecipient(recipientsData[0].address);
+
+      setRecipients(recipientsData);
+      console.log(recipientsData);
+    }
+
+    getRecipientsAddress();
+  }, [balance]);
+
+  function handleSelect(e) {
+    const recipients = e.target.value;
+    console.log({ recipients });
+
+    if (recipients) {
+      setRecipient(recipients);
+    }
+  }
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
 
@@ -19,8 +44,10 @@ function Transfer({ address, setBalance }) {
         recipient,
       });
       setBalance(balance);
+      setSendAmount('');
     } catch (ex) {
-      alert(ex.response.data.message);
+      console.log(ex);
+      // alert(ex.response.data.message);
     }
   }
 
@@ -38,12 +65,16 @@ function Transfer({ address, setBalance }) {
       </label>
 
       <label>
-        Recipient
-        <input
-          placeholder="Type an address, for example: 0x2"
-          value={recipient}
-          onChange={setValue(setRecipient)}
-        ></input>
+        Recipients addresses
+        <select value={recipient} onChange={handleSelect}>
+          {recipients.map(({ address, balance }) => {
+            return (
+              <option key={address} value={address}>
+                {address} - balance {balance}
+              </option>
+            );
+          })}
+        </select>
       </label>
 
       <input type="submit" className="button" value="Transfer" />
